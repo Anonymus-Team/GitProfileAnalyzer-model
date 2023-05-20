@@ -15,4 +15,4 @@
 Linux:
 
     $ chmod +x ./analyze.sh
-    $ ./analyze.sh
+    $ ./analyze.sh https://github.com/your-repository-link-here
