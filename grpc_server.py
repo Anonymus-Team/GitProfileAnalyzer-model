@@ -41,20 +41,26 @@ class ModelService(msGrpc.ModelServicer):
         except UnicodeDecodeError as e:
             print('UnicodeDecodeError: ', e)
 
+        response = msClasses.Grades()
+
         for author in diffs_by_author:
             testing_data = split_by_chunks(diffs_by_author[author])
             predictions = regression_model(testing_data)
-            print(f"{author}:\n\tPrediction salary =  ~", np.mean(predictions) * SCALE_RATIO)
+            
+            salary = np.mean(predictions) * config.SCALE_RATIO 
+            grade = msClasses.Grade(nickname=author, salary=float(salary))
+            response.grade.append(grade)
+
             del predictions
             del diffs_by_author[author]
 
-        return super().GetGrades(request, context)
+        return response
 
 
 def split_by_chunks(data: str):
     X = []
     for text in data:
-        chunks = [text[i:i+CHUNK_SIZE] for i in range(0, len(text), CHUNK_SIZE)]
+        chunks = [text[i:i+config.CHUNK_SIZE] for i in range(0, len(text), config.CHUNK_SIZE)]
         if chunks:
             X += chunks
     return X
