@@ -1,5 +1,8 @@
+import traceback
 import subprocess
 import os
+import codecs
+from concurrent import futures
 
 import config
 
@@ -10,7 +13,6 @@ import proto.model_service_pb2_grpc as msGrpc
 import tensorflow as tf
 import tensorflow_hub as hub
 import tensorflow_text as text
-from official.nlp import optimization  # to create AdamW optimizer
 import numpy as np
 
     
@@ -31,15 +33,15 @@ class ModelService(msGrpc.ModelServicer):
             # build path to found directories
             auhors_dirs = [os.path.join(work_dir, p) for p in auhors_dirs]
             for d in auhors_dirs:
-                with open(os.path.join(d, 'author.email')) as e:
+                with codecs.open(os.path.join(d, 'author.email'), encoding='utf-8') as e:
                     email = e.readline()
-                with open(os.path.join(d, 'history')) as h:
+                with codecs.open(os.path.join(d, 'history'), encoding='utf-8') as h:
                     history = ''.join(h.readlines())    # read all file
                 diffs_by_author[email] = history
         except FileNotFoundError as e:
             print('no diffs found!:', e)
         except UnicodeDecodeError as e:
-            print('UnicodeDecodeError: ', e)
+            traceback.print_exc()
 
         response = msClasses.Grades()
 
@@ -68,7 +70,7 @@ def split_by_chunks(data: str):
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    msGrpc.add_ModelServicer_to_server(ModelService, server)
+    msGrpc.add_ModelServicer_to_server(ModelService(), server)
     server.add_insecure_port('[::]:50051')
     server.start()
     server.wait_for_termination()
