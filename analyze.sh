@@ -2,16 +2,24 @@
 
 REPO=$1
 
-REPO_FOLDER="./tmprepo"
-DIFFS_FOLDER="./tmpdiffs"
+# Create randomstring, example: dWAS7w3KEeOjRAx9kpaA
+RAND_STR = $(tr -dc A-Za-z0-9 </dev/urandom | head -c 20 ; echo '');
 
-mkdir -p "$REPO_FOLDER";
-mkdir -p "$DIFFS_FOLDER";
+REPO_FOLDER="/tmp/ModelService/repos/$RAND_STR"
+DIFFS_FOLDER="/tmp/ModelService/diffs/$RAND_STR"
+
+# Check if folders exist and create if not
+if [! -d $REPO_FOLDER]; then
+    mkdir -p "$REPO_FOLDER";
+fi;
+
+if [! -d $DIFFS_FOLDER]; then
+    mkdir -p "$DIFFS_FOLDER";
+fi;
 
 git clone $REPO $REPO_FOLDER --single-branch --no-tags --bare --quiet; 
 
 cd "$REPO_FOLDER";
-
 
 AUTORS=$( git log --pretty="%ae" | sort -u ); 
 
