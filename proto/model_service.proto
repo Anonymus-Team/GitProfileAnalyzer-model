@@ -9,7 +9,7 @@ message GradesRequest {
 }
 
 message Grade {
-    int32 salary = 1;
+    float salary = 1;
     string nickname = 2;
 }
 
