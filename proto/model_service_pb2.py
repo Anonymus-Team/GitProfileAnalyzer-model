@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13model_service.proto\" \n\rGradesRequest\x12\x0f\n\x07repLink\x18\x01 \x01(\t\")\n\x05Grade\x12\x0e\n\x06salary\x18\x01 \x01(\x05\x12\x10\n\x08nickname\x18\x02 \x01(\t\"\x1f\n\x06Grades\x12\x15\n\x05grade\x18\x01 \x03(\x0b\x32\x06.Grade2-\n\x05Model\x12$\n\tGetGrades\x12\x0e.GradesRequest\x1a\x07.Gradesb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13model_service.proto\" \n\rGradesRequest\x12\x0f\n\x07repLink\x18\x01 \x01(\t\")\n\x05Grade\x12\x0e\n\x06salary\x18\x01 \x01(\x02\x12\x10\n\x08nickname\x18\x02 \x01(\t\"\x1f\n\x06Grades\x12\x15\n\x05grade\x18\x01 \x03(\x0b\x32\x06.Grade2-\n\x05Model\x12$\n\tGetGrades\x12\x0e.GradesRequest\x1a\x07.Gradesb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'model_service_pb2', globals())

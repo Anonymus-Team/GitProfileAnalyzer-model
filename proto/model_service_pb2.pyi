@@ -10,8 +10,8 @@ class Grade(_message.Message):
     NICKNAME_FIELD_NUMBER: _ClassVar[int]
     SALARY_FIELD_NUMBER: _ClassVar[int]
     nickname: str
-    salary: int
-    def __init__(self, salary: _Optional[int] = ..., nickname: _Optional[str] = ...) -> None: ...
+    salary: float
+    def __init__(self, salary: _Optional[float] = ..., nickname: _Optional[str] = ...) -> None: ...
 
 class Grades(_message.Message):
     __slots__ = ["grade"]
