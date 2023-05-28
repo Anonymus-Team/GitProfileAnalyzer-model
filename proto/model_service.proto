@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+service Model {
+    rpc GetGrades (GradesRequest) returns (Grades);
+}
+
+message GradesRequest {
+    string repLink = 1;
+}
+
+message Grade {
+    float salary = 1;
+    string nickname = 2;
+}
+
+message Grades {
+    repeated Grade grade = 1;
+}
