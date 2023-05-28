@@ -36,7 +36,16 @@ class ModelService(msGrpc.ModelServicer):
                 with codecs.open(os.path.join(d, 'author.email'), encoding='utf-8') as e:
                     email = e.readline()
                 with codecs.open(os.path.join(d, 'history'), encoding='utf-8') as h:
-                    history = ''.join(h.readlines())    # read all file
+                    line = 'line'
+                    history = []
+                    while line:
+                        try:
+                            line = h.readline()
+                            history.append(line)
+                        except UnicodeDecodeError:
+                            pass
+                    history = ''.join(history)    # read all file
+
                 diffs_by_author[email] = history
         except FileNotFoundError as e:
             print('no diffs found!:', e)
