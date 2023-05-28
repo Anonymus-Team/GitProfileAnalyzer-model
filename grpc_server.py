@@ -54,7 +54,7 @@ class ModelService(msGrpc.ModelServicer):
             response.grade.append(grade)
 
             del predictions
-            del diffs_by_author[author]
+        del diffs_by_author
 
         return response
 
