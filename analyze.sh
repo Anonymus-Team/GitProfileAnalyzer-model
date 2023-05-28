@@ -19,6 +19,8 @@ fi;
 
 git clone $REPO $REPO_FOLDER --single-branch --no-tags --bare --quiet; 
 
+cd $REPO_FOLDER
+
 AUTORS=$( git log --pretty="%ae" | sort -u ); 
 
 NUMAUTHOR=1
@@ -32,18 +34,16 @@ for author in ${AUTORS[@]}; do
 	HISTORY=( $(printf '%s\n' "${HISTORY[@]}" | tac | tr '\n' ' '; echo) );
 
 	if [[ $(echo ${HISTORY[@]} | wc -w) = 0 ]]; then
-		rm -rf "../$DIFFS_FOLDER/$NUMAUTHOR";
+		rm -rf "$DIFFS_FOLDER/$NUMAUTHOR";
 	        continue;
 	fi;
 
 	for commit in ${HISTORY[@]}; do
-		git show --pretty="%b" "$commit" >>"$DIFFS_FOLDER/$NUMAUTHOR/history";
+		git show --encoding=UTF-8 --pretty="%b" "$commit" >>"$DIFFS_FOLDER/$NUMAUTHOR/history";
 	done;
 
 	NUMAUTHOR=$((NUMAUTHOR+1))
 done;
-
-cd ..;
 
 echo $DIFFS_FOLDER;
 
