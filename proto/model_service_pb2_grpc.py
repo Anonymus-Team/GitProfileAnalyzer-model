@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import model_service_pb2 as model__service__pb2
+from . import model_service_pb2 as model__service__pb2
 
 
 class ModelStub(object):

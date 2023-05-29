@@ -1,0 +1,2 @@
+from proto import model_service_pb2
+from proto import model_service_pb2_grpc

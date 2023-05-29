@@ -1,61 +1,62 @@
-import traceback
 import subprocess
 import os
-import codecs
+import logging
 from concurrent import futures
 
-import config
-
 import grpc
+
 import proto.model_service_pb2 as msClasses
 import proto.model_service_pb2_grpc as msGrpc
+import binary_reader
+import config
 
 import tensorflow as tf
 import tensorflow_hub as hub
 import tensorflow_text as text
 import numpy as np
 
-    
+tf.get_logger().setLevel('ERROR')
+logging.basicConfig(level=logging.INFO)
+
 regression_model = tf.saved_model.load(config.SAVED_MODEL_PATH)
+
+r_gen = np.random.default_rng()
 
 class ModelService(msGrpc.ModelServicer):
     def GetGrades(self, request, context):
         link = request.repLink
+        logging.info(f"Downloading and processing the repository: {link}")
         # The sctipt returns path to diffs folder
         output = subprocess.run(['bash', './analyze.sh', link], capture_output=True, text=True)
         # Need a substring because the outupt have a \n at line end
         work_dir = output.stdout[:-1] 
         diffs_by_author = {}
 
-        try:
-            auhors_dirs = os.listdir(work_dir)
+        auhors_dirs = os.listdir(work_dir)
 
-            # build path to found directories
-            auhors_dirs = [os.path.join(work_dir, p) for p in auhors_dirs]
-            for d in auhors_dirs:
-                with codecs.open(os.path.join(d, 'author.email'), encoding='utf-8') as e:
-                    email = e.readline()
-                with codecs.open(os.path.join(d, 'history'), encoding='utf-8') as h:
-                    line = 'line'
-                    history = []
-                    while line:
-                        try:
-                            line = h.readline()
-                            history.append(line)
-                        except UnicodeDecodeError:
-                            pass
-                    history = ''.join(history)    # read all file
+        logging.info("Reading diffs...")
+        # build path to found directories
+        auhors_dirs = [os.path.join(work_dir, p) for p in auhors_dirs]
+        for d in auhors_dirs:
+            with open(os.path.join(d, 'author.email'), encoding='utf-8') as e:
+                email = e.readline()
+            
+            history = binary_reader.read_file(os.path.join(d, 'history'))
 
-                diffs_by_author[email] = history
-        except FileNotFoundError as e:
-            print('no diffs found!:', e)
-        except UnicodeDecodeError as e:
-            traceback.print_exc()
+            diffs_by_author[email] = history
 
         response = msClasses.Grades()
 
         for author in diffs_by_author:
+            logging.info(f"Split data by chunks for {author}")
             testing_data = split_by_chunks(diffs_by_author[author])
+            
+            # sparse data to optimize performance
+            if config.OPTIMIZE:
+                indexes = r_gen.integers(0, len(testing_data), config.PREDICT_CLIP)
+                testing_data = [testing_data[i] for i in indexes]
+
+            logging.info(f"Running model for {author}")
             predictions = regression_model(testing_data)
             
             salary = np.mean(predictions) * config.SCALE_RATIO 
