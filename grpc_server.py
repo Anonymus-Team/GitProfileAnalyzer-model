@@ -18,7 +18,9 @@ import numpy as np
 tf.get_logger().setLevel('ERROR')
 logging.basicConfig(level=logging.INFO)
 
+logging.info('Loading model {config.SAVED_MODEL_PATH}')
 regression_model = tf.saved_model.load(config.SAVED_MODEL_PATH)
+logging.info('Model was loaded')
 
 r_gen = np.random.default_rng()
 
@@ -53,12 +55,15 @@ class ModelService(msGrpc.ModelServicer):
             
             # sparse data to optimize performance
             if config.OPTIMIZE:
-                indexes = r_gen.integers(0, len(testing_data), config.PREDICT_CLIP)
+                max_samples = config.PREDICT_CLIP
+                if max_samples > len(testing_data):
+                    max_samples = len(testing_data)
+                indexes = r_gen.integers(0, len(testing_data), max_samples)
                 testing_data = [testing_data[i] for i in indexes]
 
             logging.info(f"Running model for {author}")
             predictions = regression_model(testing_data)
-            
+
             salary = np.mean(predictions) * config.SCALE_RATIO 
             grade = msClasses.Grade(nickname=author, salary=float(salary))
             response.grade.append(grade)
